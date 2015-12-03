@@ -1,20 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using NServiceBus.Transports;
-using SlackConnector;
-using NServiceBus;
+using System.IO;
+using System.Linq;
 using SlackConnector.Models;
+using Newtonsoft.Json;
+using NServiceBus.Transports;
+using NServiceBus.Extensibility;
+using NServiceBus;
+using SlackConnector;
 
 namespace Hackathon.SlackTransport
 {
-    using System.Diagnostics;
-    using System.IO;
-    using NServiceBus.Extensibility;
-    using SlackConnector = SlackConnector.SlackConnector;
 
+
+    public class RawAttachment
+    {
+        public string text { get; set; }
+        public string title { get; set; }
+        public int id { get; set; }
+        public string fallback { get; set; }
+    }
+
+    public class RawMessage
+    {
+        public string type { get; set; }
+        public string user { get; set; }
+        public string text { get; set; }
+        public List<RawAttachment> attachments { get; set; }
+        public string channel { get; set; }
+        public string ts { get; set; }
+    }
 
     public class SlackMessagePusher : IPushMessages
     {
@@ -22,6 +38,7 @@ namespace Hackathon.SlackTransport
         private Func<PushContext, Task> _pipe;
         private ISlackConnection _connection;
         private string _apiKey;
+        private PushSettings _settings;
 
         public SlackMessagePusher(EndpointName endpointName, string apiKey)
         {
@@ -32,22 +49,43 @@ namespace Hackathon.SlackTransport
         public void Init(Func<PushContext, Task> pipe, PushSettings settings)
         {
             _pipe = pipe;
-            var connector = new SlackConnector();
+            _settings = settings;
+            var connector = new SlackConnector.SlackConnector();
             _connection = connector.Connect(_apiKey).GetAwaiter().GetResult();
         }
 
         public void Start(PushRuntimeSettings limitations)
         {
-            Console.WriteLine("Starting Slack MessagePusher for endpoint {0}", _endpointName);
+            Console.WriteLine("Starting Slack MessagePusher for endpoint {0} input queue {1}", _endpointName, _settings.InputQueue);
             _connection.OnMessageReceived += MessageReceived;
         }
 
         async Task MessageReceived(SlackMessage message)
         {
+            //Quick hack to ignore timeouts queue
+            if (_settings.InputQueue.Contains("."))
+                return;
 
-            Debug.WriteLine(message.RawData);
 
-            await _pipe(new PushContext("test", new Dictionary<string, string>(), new MemoryStream(),
+            var rawMsg = JsonConvert.DeserializeObject<RawMessage>(message.RawData);
+
+            if (message.ChatHub.Name != string.Concat("#", _endpointName))
+                return;
+
+            if (rawMsg.attachments.Count == 0)
+                return;
+
+            var idAttachment = rawMsg.attachments.First(a => a.title == "MessageId");
+            var headersAttachment = rawMsg.attachments.First(a => a.title == "Headers");
+            var bodyAttachment = rawMsg.attachments.First(a => a.title == "Body");
+
+            if (idAttachment == null || headersAttachment == null || bodyAttachment == null)
+                return;
+
+            var headers = JsonConvert.DeserializeObject<Dictionary<string, string>>(headersAttachment.text);
+            var body =  new MemoryStream(JsonConvert.DeserializeObject<byte[]>(bodyAttachment.text));
+
+            await _pipe(new PushContext(idAttachment.text, headers, body,
                 new NoOpTransaction(), new ContextBag()));
         }
 

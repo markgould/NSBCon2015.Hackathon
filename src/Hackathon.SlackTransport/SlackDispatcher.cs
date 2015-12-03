@@ -11,6 +11,7 @@ using SlackConnector;
 namespace Hackathon.SlackTransport
 {
     using Newtonsoft.Json;
+    using NServiceBus.Routing;
     using SlackConnector.Models;
     using SlackConnector = SlackConnector.SlackConnector;
 
@@ -31,9 +32,14 @@ namespace Hackathon.SlackTransport
         {
             await CheckConnection();
 
-
             foreach (var op in outgoingMessages)
             {
+                var tag = op.DispatchOptions.AddressTag as UnicastAddressTag;
+                var hub = _slackConnection.ConnectedChannels().FirstOrDefault(x => x.Name.Equals(string.Concat("#", tag.Destination), StringComparison.InvariantCultureIgnoreCase));
+
+                if (hub == null)
+                    continue;
+
                 var attachments = new List<SlackAttachment>();
                 attachments.Add(new SlackAttachment()
                 {
@@ -53,7 +59,7 @@ namespace Hackathon.SlackTransport
 
                 var slackMessage = new BotMessage()
                 {
-                    ChatHub = _slackConnection.ConnectedChannels().First(x => x.Name.Equals(string.Concat("#", _endpointName), StringComparison.InvariantCultureIgnoreCase)),
+                    ChatHub = hub,
                     Attachments =attachments
                 };
 

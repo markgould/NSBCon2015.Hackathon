@@ -39,7 +39,7 @@
                     return;
                 }
 
-                await context.Send("Hackathon.Receiver", new HelloMessage
+                await context.Send("receiver", new HelloMessage
                 {
                     Message = message
                 });
