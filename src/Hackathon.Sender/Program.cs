@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using Hackathon.Messages;
+    using Hackathon.SlackTransport;
     using NServiceBus;
 
     class Program
@@ -14,9 +15,11 @@
 
         static async Task Start()
         {
+            
             var busConfiguration = new BusConfiguration();
-            busConfiguration.EndpointName("Hackathon.Sender");
+            busConfiguration.EndpointName("sender");
             busConfiguration.UseSerialization<JsonSerializer>();
+            busConfiguration.UseTransport<SlackTransport>().ConnectionString("xoxb-15862501655-ASNxruOyfmshKpXCJsLsKyxI");
             busConfiguration.UsePersistence<InMemoryPersistence>();
             busConfiguration.EnableInstallers();
 

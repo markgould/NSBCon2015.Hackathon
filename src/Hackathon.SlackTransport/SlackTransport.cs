@@ -1,54 +1,56 @@
-﻿namespace Hackathon.SlackTransport
+﻿using System;
+using System.Collections.Generic;
+using NServiceBus;
+using NServiceBus.Settings;
+using NServiceBus.Support;
+using NServiceBus.Transports;
+using System.Threading.Tasks;
+
+namespace Hackathon.SlackTransport
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using NServiceBus;
-    using NServiceBus.Settings;
-    using NServiceBus.Support;
-    using NServiceBus.Transports;
-
-
+    
     public class SlackTransport : TransportDefinition
     {
-        protected override TransportReceivingConfigurationResult ConfigureForReceiving(TransportReceivingConfigurationContext context)
+        protected override void ConfigureForReceiving(TransportReceivingConfigurationContext context)
         {
-            throw new NotImplementedException();
+            context.SetMessagePumpFactory(p => new SlackMessagePusher(context.Settings.EndpointName(), context.ConnectionString));
+            context.SetQueueCreatorFactory(() => new QueueCreator());
         }
 
-        protected override TransportSendingConfigurationResult ConfigureForSending(TransportSendingConfigurationContext context)
+        protected override void ConfigureForSending(TransportSendingConfigurationContext context)
         {
-            throw new NotImplementedException();
+            context.SetDispatcherFactory(() => new SlackDispatcher(context.GlobalSettings.EndpointName(), context.ConnectionString));
         }
 
         public override IEnumerable<Type> GetSupportedDeliveryConstraints()
         {
-            throw new NotImplementedException();
+            return new List<Type>();
         }
 
         public override TransactionSupport GetTransactionSupport()
         {
-            throw new NotImplementedException();
+            return TransactionSupport.None;
         }
 
         public override IManageSubscriptions GetSubscriptionManager()
         {
-            throw new NotImplementedException();
+            return new SlackSubscriptionManager();
         }
 
-        public override string GetDiscriminatorForThisEndpointInstance(ReadOnlySettings settings)
+        public override string GetDiscriminatorForThisEndpointInstance()
         {
-            throw new NotImplementedException();
+            return RuntimeEnvironment.MachineName;
         }
+       
 
         public override string ToTransportAddress(LogicalAddress logicalAddress)
         {
-            throw new NotImplementedException();
+            return logicalAddress.ToString();
         }
 
         public override OutboundRoutingPolicy GetOutboundRoutingPolicy(ReadOnlySettings settings)
         {
-            throw new NotImplementedException();
+            return new OutboundRoutingPolicy(OutboundRoutingType.DirectSend, OutboundRoutingType.DirectSend, OutboundRoutingType.DirectSend);
         }
 
         public override string ExampleConnectionStringForErrorMessage { get; }

@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0-unstable1208\lib\net452\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-unstable1150\lib\net452\NServiceBus.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -59,6 +59,10 @@
     <ProjectReference Include="..\Hackathon.Messages\Hackathon.Messages.csproj">
       <Project>{482d146c-c295-4898-80f0-0ba4fcd8c0da}</Project>
       <Name>Hackathon.Messages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hackathon.SlackTransport\Hackathon.Slack.csproj">
+      <Project>{F8CF2BF5-77FC-4367-9567-0DB1A4B645AF}</Project>
+      <Name>Hackathon.Slack</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
