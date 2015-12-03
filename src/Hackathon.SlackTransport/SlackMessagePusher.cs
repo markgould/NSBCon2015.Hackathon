@@ -56,7 +56,7 @@ namespace Hackathon.SlackTransport
 
         public void Start(PushRuntimeSettings limitations)
         {
-            Console.WriteLine("Starting Slack MessagePusher for endpoint {0} input queue {1}", _endpointName, _settings.InputQueue);
+            //Console.WriteLine("Starting Slack MessagePusher for endpoint {0} input queue {1}", _endpointName, _settings.InputQueue);
             _connection.OnMessageReceived += MessageReceived;
         }
 
@@ -65,7 +65,6 @@ namespace Hackathon.SlackTransport
             //Quick hack to ignore timeouts queue
             if (_settings.InputQueue.Contains("."))
                 return;
-
 
             var rawMsg = JsonConvert.DeserializeObject<RawMessage>(message.RawData);
 
@@ -91,7 +90,6 @@ namespace Hackathon.SlackTransport
 
         public Task Stop()
         {
-            Console.WriteLine("Stopping Slack MessagePusher for endpoint {0}", _endpointName);
             _connection.Disconnect();
             return Task.FromResult(0);
         }

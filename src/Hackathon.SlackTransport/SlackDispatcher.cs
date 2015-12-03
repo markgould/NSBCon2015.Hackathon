@@ -60,10 +60,10 @@ namespace Hackathon.SlackTransport
                 var slackMessage = new BotMessage()
                 {
                     ChatHub = hub,
-                    Attachments =attachments
+                    Attachments = attachments
                 };
 
-               await  _slackConnection.Say(slackMessage);
+                await _slackConnection.Say(slackMessage);
             }
         }
 
@@ -71,10 +71,9 @@ namespace Hackathon.SlackTransport
         {
             if (_slackConnection != null)
                 return;
-           
+
             var connector = new SlackConnector();
             _slackConnection = await connector.Connect(_apiKey);
         }
     }
 }
-
