@@ -56,7 +56,7 @@ namespace Hackathon.SlackTransport
 
         public void Start(PushRuntimeSettings limitations)
         {
-            //Console.WriteLine("Starting Slack MessagePusher for endpoint {0} input queue {1}", _endpointName, _settings.InputQueue);
+            Console.WriteLine("Starting Slack MessagePusher for endpoint {0} input queue {1}", _endpointName, _settings.InputQueue);
             _connection.OnMessageReceived += MessageReceived;
         }
 
@@ -68,7 +68,7 @@ namespace Hackathon.SlackTransport
 
             var rawMsg = JsonConvert.DeserializeObject<RawMessage>(message.RawData);
 
-            if (message.ChatHub.Name != string.Concat("#", _endpointName))
+            if (!message.ChatHub.Name.Equals(string.Concat("#", _endpointName), StringComparison.InvariantCultureIgnoreCase) && !message.ChatHub.Name.Equals(string.Concat("#", _settings.InputQueue), StringComparison.InvariantCultureIgnoreCase))
                 return;
 
             if (rawMsg.attachments.Count == 0)
@@ -82,7 +82,7 @@ namespace Hackathon.SlackTransport
                 return;
 
             var headers = JsonConvert.DeserializeObject<Dictionary<string, string>>(headersAttachment.text);
-            var body =  new MemoryStream(JsonConvert.DeserializeObject<byte[]>(bodyAttachment.text));
+            var body = new MemoryStream(JsonConvert.DeserializeObject<byte[]>(bodyAttachment.text));
 
             await _pipe(new PushContext(idAttachment.text, headers, body,
                 new NoOpTransaction(), new ContextBag()));

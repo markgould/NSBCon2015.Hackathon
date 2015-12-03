@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="HelloMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReplyMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

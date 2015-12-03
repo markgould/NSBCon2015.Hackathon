@@ -7,15 +7,12 @@ using NServiceBus.Extensibility;
 using NServiceBus.Transports;
 using NServiceBus;
 using SlackConnector;
+using Newtonsoft.Json;
+using NServiceBus.Routing;
+using SlackConnector.Models;
 
 namespace Hackathon.SlackTransport
 {
-    using Newtonsoft.Json;
-    using NServiceBus.Routing;
-    using SlackConnector.Models;
-    using SlackConnector = SlackConnector.SlackConnector;
-
-
     public class SlackDispatcher : IDispatchMessages
     {
         private readonly EndpointName _endpointName;
@@ -38,7 +35,10 @@ namespace Hackathon.SlackTransport
                 var hub = _slackConnection.ConnectedChannels().FirstOrDefault(x => x.Name.Equals(string.Concat("#", tag.Destination), StringComparison.InvariantCultureIgnoreCase));
 
                 if (hub == null)
+                {
                     continue;
+                }
+
 
                 var attachments = new List<SlackAttachment>();
                 attachments.Add(new SlackAttachment()
@@ -72,7 +72,7 @@ namespace Hackathon.SlackTransport
             if (_slackConnection != null)
                 return;
 
-            var connector = new SlackConnector();
+            var connector = new SlackConnector.SlackConnector();
             _slackConnection = await connector.Connect(_apiKey);
         }
     }

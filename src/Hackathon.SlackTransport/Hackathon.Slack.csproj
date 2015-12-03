@@ -68,7 +68,6 @@
     <Compile Include="SlackMessagePusher.cs" />
     <Compile Include="SlackSubscriptionManager.cs" />
     <Compile Include="SlackTransport.cs" />
-    <Compile Include="SlackTransportConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
